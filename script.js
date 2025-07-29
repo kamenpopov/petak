@@ -13,8 +13,10 @@ const requestOrientation = async () => {
       const response = await DeviceOrientationEvent.requestPermission();
       if (response === 'granted') {
         window.addEventListener('deviceorientationabsolute', handleOrientation);
-        // window.addEventListener('deviceorientation', handleOrientation);
+        window.addEventListener('deviceorientation', handleOrientation);
+
         document.getElementById('enable-orientation').style.display = 'none';
+        arrow.style.display = 'flex';
       } else {
         alert('Permission denied for device orientation');
       }
@@ -26,20 +28,31 @@ const requestOrientation = async () => {
     // For non-iOS devices (or Android Chrome)
     window.addEventListener('deviceorientationabsolute', handleOrientation);
     window.addEventListener('deviceorientation', handleOrientation);
-    console.log('Compass enabled');
+
+    document.getElementById('enable-orientation').style.display = 'none';
+    arrow.style.display = 'flex';
   }
 }
 
 
-let pois = [];
+// let pois = [];
+const pois = [
+	{ name: "Vitosha Boulevard", coords: [23.3189, 42.6934], category: "shopping" },
+	{ name: "National Palace of Culture (NDK)", coords: [23.3199, 42.6863], category: "landmark" },
+	{ name: "Alexander Nevsky Cathedral", coords: [23.3325, 42.6957], category: "church" },
+	{ name: "Sofia University", coords: [23.3358, 42.6932], category: "education" },
+	{ name: "Borisova Gradina Park", coords: [23.3421, 42.6859], category: "park" },
+	{ name: "Paradise Center", coords: [23.3056, 42.6584], category: "mall" },
+	{ name: "Serdika Center", coords: [23.3447, 42.6847], category: "mall" },
+	{ name: "Sofia Zoo", coords: [23.3380, 42.6480], category: "zoo" }
+];
 let poiMarkers = [];
 let userLocation = null;
 let nearestPOI = null;
 let heading = null;
 let smoothedHeading = null;
 const smoothingFactor = 0.15;
-const compassDiv = document.getElementById('compass');
-const arrow = document.getElementById('arrow');
+const arrow = document.getElementById('arrow-component');
 
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
@@ -56,23 +69,34 @@ function getNearestPOI(pos) {
     const distA = haversine(pos.coords.latitude, pos.coords.longitude, a.coords[1], a.coords[0]);
     const distB = haversine(pos.coords.latitude, pos.coords.longitude, b.coords[1], b.coords[0]);
     return distA < distB ? a : b;
-  });
+  }); // TODO: Return distance as well
+}
+
+function bearingBetweenPoints(lat1, lon1, lat2, lon2) {
+  const toRad = deg => deg * Math.PI / 180;
+  const toDeg = rad => rad * 180 / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+            Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  let brng = Math.atan2(y, x);
+  brng = toDeg(brng);
+  return (brng + 360) % 360;
 }
 
 function updateArrowDirection() {
   if (!heading || !userLocation || !nearestPOI) return;
 
   const user = userLocation.coords;
-  const dx = nearestPOI.coords[0] - user.longitude;
-  const dy = nearestPOI.coords[1] - user.latitude;
-  const angleToPOI = Math.atan2(dy, dx) * 180 / Math.PI;
+  const poi = nearestPOI.coords;
 
-  console.log('Angle: ', angleToPOI);
-  
+  const bearingToPOI = bearingBetweenPoints(user.latitude, user.longitude, poi[1], poi[0]);
+  let rotation = bearingToPOI - heading;
 
-  console.log(heading, angleToPOI)
-  const rotation = angleToPOI - heading;
-  arrow.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+  // arrow.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+  arrow.style.transform = `rotate(${rotation}deg)`;
+  console.log('rotation: ', rotation);
+
 }
 
 function renderPOIMarkers(userLat, userLng) {
@@ -92,22 +116,23 @@ function renderPOIMarkers(userLat, userLng) {
 }
 
 async function fetchAndRenderPOIs(lat, lng) {
-  const category = document.getElementById('category').value;
-  const maxDistance = 5000;
-  const params = new URLSearchParams({ lat, lng, category, maxDistance });
-  const res = await fetch(`http://localhost:3000/api/pois?${params}`);
-  pois = await res.json();
+  // const category = document.getElementById('category').value;
+  // const maxDistance = 5000;
+  // const params = new URLSearchParams({ lat, lng, category, maxDistance });
+  // // const res = await fetch(`http://localhost:3000/api/pois?${params}`);
+  // const res = await fetch(`https://192.168.0.104:3000/api/pois?${params}`);
+  // pois = await res.json();
   nearestPOI = getNearestPOI({ coords: { latitude: lat, longitude: lng } });
   updateArrowDirection();
   renderPOIMarkers(lat, lng);
 }
 
-document.getElementById('category').addEventListener('change', () => {
-  if (userLocation) {
-    const { latitude, longitude } = userLocation.coords;
-    fetchAndRenderPOIs(latitude, longitude);
-  }
-});
+// document.getElementById('category').addEventListener('change', () => {
+//   if (userLocation) {
+//     const { latitude, longitude } = userLocation.coords;
+//     fetchAndRenderPOIs(latitude, longitude);
+//   }
+// });
 
 navigator.geolocation.watchPosition((pos) => {
   userLocation = pos;
@@ -118,15 +143,21 @@ navigator.geolocation.watchPosition((pos) => {
 });
 
 function handleOrientation(event) {
-  if (!event.alpha) return;
-  const rawHeading = event.alpha;
-  if (smoothedHeading === null) {
-    smoothedHeading = rawHeading;
-  } else {
-    smoothedHeading = smoothedHeading * (1 - smoothingFactor) + rawHeading * smoothingFactor;
-  }
-  heading = smoothedHeading;
-  compassDiv.innerText = `Heading: ${Math.round(heading)}°`;
+  if (event.webkitCompassHeading !== undefined) {
 
+    heading = event.webkitCompassHeading;
+  } else if (event.alpha !== null) {
+    const rawHeading = 360 - event.alpha;
+    if (smoothedHeading === null) {
+      smoothedHeading = rawHeading;
+    } else {
+      smoothedHeading = smoothedHeading * (1 - smoothingFactor) + rawHeading * smoothingFactor;
+    }
+    heading = smoothedHeading;
+  } else {
+    return;
+  }
+
+  // compassDiv.innerText = `Heading: ${Math.round(heading)}°`;
   updateArrowDirection();
 }

@@ -55,10 +55,10 @@ app.get('/api/pois', (req, res) => {
   res.json(nearby);
 });
 
-// https.createServer(credentials, app).listen(PORT, () => {
-// 	console.log(`HTTPS POI server running at https://localhost:${PORT}`);
-// });
-
-app.listen(PORT, () => {
-  console.log('Listening');
+https.createServer(credentials, app).listen(PORT, () => {
+	console.log(`HTTPS POI server running at https://localhost:${PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log('Listening');
+// });

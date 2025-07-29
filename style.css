@@ -1,0 +1,114 @@
+body,
+html {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+#map {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+}
+
+#arrow {
+	position: absolute;
+	top: 100px;
+	left: 50%;
+	width: 60px;
+	height: 60px;
+	background: url('https://upload.wikimedia.org/wikipedia/commons/3/3c/Red_Arrow_Down.svg') no-repeat center;
+	background-size: contain;
+	transform-origin: center center;
+	transform: translateX(-50%) rotate(0deg);
+	transition: transform 0.2s ease-out;
+}
+
+#compass {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	background: white;
+	padding: 4px;
+	border-radius: 4px;
+	z-index: 2;
+}
+
+#controls {
+	width: 100dvw;
+	height: 100dvh;
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;
+	background: white;
+	padding: 10px;
+	font-family: sans-serif;
+	z-index: 2;
+	padding: 0;
+}
+
+#centered {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#enable-orientation {
+	justify-self: center;
+	align-self: center;
+	height: 40%;
+	aspect-ratio: 1 / 1;
+	background-color: #00ff0056;
+	font-size: x-large;
+	color: black;
+	border-radius: 20px;
+	border: none;
+	cursor: pointer;
+}
+
+#arrow-component {
+	position: relative;
+	height: 185px;
+	width: 148px;
+	scale: 150%;
+	display: none;
+	align-items: center;
+}
+
+#pulse {
+	background: linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 1) 0%,
+		rgb(83, 192, 128) 50%,
+		rgba(0, 0, 0, 1) 100%
+	);
+	background-repeat: no-repeat;
+	background-size: 100% 200%;
+	background-position: 0% -100%;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	animation: pulse 5s linear infinite;
+	clip-path: path(
+		"M84 175C84 180.523 79.5228 185 74 185C68.4772 185 64 180.523 64 175H84ZM66.9289 2.92893C70.8342 -0.976311 77.1658 -0.976311 81.0711 2.92893L144.711 66.5685C148.616 70.4738 148.616 76.8054 144.711 80.7107C140.805 84.6159 134.474 84.6159 130.569 80.7107L74 24.1421L17.4315 80.7107C13.5262 84.6159 7.19456 84.6159 3.28932 80.7107C-0.615921 76.8054 -0.615921 70.4738 3.28932 66.5685L66.9289 2.92893ZM74 175H64L64 10H74H84L84 175H74Z"
+	);
+}
+
+@keyframes pulse {
+	0% {
+		background-position: 0% -100%;
+	}
+
+	60% {
+		background-position: 0% 200%;
+	}
+
+	100% {
+		background-position: 0% 200%;
+	}
+}

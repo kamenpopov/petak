@@ -6,23 +6,7 @@
   <title>Compass POI Finder</title>
   <link rel="manifest" href="/manifest.json" />
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <style>
-    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-    #arrow {
-      position: absolute; top: 100px; left: 50%; width: 60px; height: 60px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/3/3c/Red_Arrow_Down.svg') no-repeat center;
-      background-size: contain;
-      transform-origin: center center;
-      transform: translateX(-50%) rotate(0deg);
-      transition: transform 0.2s ease-out;
-    }
-    #compass { position: absolute; bottom: 10px; left: 10px; background: white; padding: 4px; border-radius: 4px; z-index: 2; }
-    #controls {
-      position: absolute; top: 10px; right: 10px; background: white;
-      padding: 10px; border-radius: 8px; font-family: sans-serif; z-index: 2;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="map"></div>
@@ -30,16 +14,25 @@
 	<i style="font-size: 5em;">^</i>
   </div>
 
-  <div id="compass">Heading: <button id="enable-orientation" onclick="requestOrientation()">Enable Compass</button></div>
   <div id="controls">
-    <label for="category">Category:</label>
+    <!-- <label for="category">Category:</label>
     <select id="category">
       <option value="">All</option>
       <option value="coffee">Coffee</option>
       <option value="museum">Museum</option>
       <option value="library">Library</option>
       <option value="food">Food</option>
-    </select>
+    </select> -->
+    <div id="centered">
+      <button id="enable-orientation" onclick="requestOrientation()">Enable Compass</button>
+
+      <div id="arrow-component">
+        <svg id="nav-arrow" width="148" height="185" viewBox="0 0 148 185" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M84 175C84 180.523 79.5228 185 74 185C68.4772 185 64 180.523 64 175H84ZM66.9289 2.92893C70.8342 -0.976311 77.1658 -0.976311 81.0711 2.92893L144.711 66.5685C148.616 70.4738 148.616 76.8054 144.711 80.7107C140.805 84.6159 134.474 84.6159 130.569 80.7107L74 24.1421L17.4315 80.7107C13.5262 84.6159 7.19456 84.6159 3.28932 80.7107C-0.615921 76.8054 -0.615921 70.4738 3.28932 66.5685L66.9289 2.92893ZM74 175H64L64 10H74H84L84 175H74Z" fill="black"/>
+        </svg>
+        <div id="pulse"></div>
+      </div>
+    </div>
   </div>
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
