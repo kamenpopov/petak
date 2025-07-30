@@ -1,62 +1,19 @@
-mapboxgl.accessToken = 'pk.eyJ1IjoiamVycnljYXNobW9uZXkiLCJhIjoiY2w1anp5cmkwMDU5eTNpbHYyNHg2emc3eiJ9.KeRpsiBDWF8fht48TTFOZQ';
-
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/streets-v11',
-  zoom: 15,
-  center: [0, 0],
-});
-
 let ORIENTATION_ACCESS = false;
 
-const requestOrientation = async () => {
-  if(ORIENTATION_ACCESS) return;
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    try {
-      const response = await DeviceOrientationEvent.requestPermission();
-      if (response === 'granted') {
-        window.addEventListener('deviceorientationabsolute', handleOrientation);
-        window.addEventListener('deviceorientation', handleOrientation);
+const $ = (sel, el=document) => el.querySelector(sel);
+const $$ = (sel, el=document) => el.querySelectorAll(sel);
 
-        document.getElementById('enable-orientation').style.display = 'none';
-        arrow.style.display = 'flex';
+const homeButtons = $$('.home-button');
 
-        ORIENTATION_ACCESS = true;
-      } else {
-        alert('Permission denied for device orientation');
-      }
-    } catch (e) {
-      alert('Error requesting permission for device orientation');
-      console.error(e);
-    }
-  } else {
-    // For non-iOS devices (or Android Chrome)
-    window.addEventListener('deviceorientationabsolute', handleOrientation);
-    window.addEventListener('deviceorientation', handleOrientation);
+let CATEGORY = '';
 
-    document.getElementById('enable-orientation').style.display = 'none';
-    arrow.style.display = 'flex';
+homeButtons.forEach(e => {
+  e.addEventListener('click', ev => {
+    requestOrientation();
+    CATEGORY = e.id;
+  });
+});
 
-    ORIENTATION_ACCESS = true;
-  }
-}
-
-
-// CATEGORIES: alc, food, club
-
-// let pois = [];
-const pois = [
-	{ name: "Vitosha Boulevard", coords: [23.3189, 42.6934], category: "shopping" },
-	{ name: "National Palace of Culture (NDK)", coords: [23.3199, 42.6863], category: "landmark" },
-	{ name: "Alexander Nevsky Cathedral", coords: [23.3325, 42.6957], category: "church" },
-	{ name: "Sofia University", coords: [23.3358, 42.6932], category: "education" },
-	{ name: "Borisova Gradina Park", coords: [23.3421, 42.6859], category: "park" },
-	{ name: "Paradise Center", coords: [23.3056, 42.6584], category: "mall" },
-	{ name: "Serdika Center", coords: [23.3447, 42.6847], category: "mall" },
-	{ name: "Sofia Zoo", coords: [23.3380, 42.6480], category: "zoo" }
-];
-
-let poiMarkers = [];
 let userLocation = null;
 let nearestPOI = null;
 let heading = null;
@@ -64,10 +21,11 @@ let smoothedHeading = null;
 const smoothingFactor = 0.15;
 
 const arrow = document.getElementById('arrow-component');
-const pulse = document.getElementById('pulse');
+const cross = document.getElementById('cross-component');
+const arrowPulse = document.getElementById('arrow-pulse');
 const headingText = document.getElementById('heading-text');
 const distanceText = document.getElementById('distance-text');
-const debug = document.getElementById('debug')
+const goingToText = document.getElementById('going-to-text');
 
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
@@ -79,11 +37,18 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 function getNearestPOI(pos) {
-  if (!pois.length) return null;
+  if (POIS.length == 0) return null;
 
-  return pois.reduce((a, b) => {
-    const distA = haversine(pos.coords.latitude, pos.coords.longitude, a.coords[1], a.coords[0]);
-    const distB = haversine(pos.coords.latitude, pos.coords.longitude, b.coords[1], b.coords[0]);
+  if(CATEGORY == 'rand') {
+    return POIS[Math.floor(Math.random() * POIS.length)];
+  }
+
+  const searchablePOIs = POIS.filter(p => p.category == CATEGORY);
+  if(searchablePOIs.length == 0) return null;
+
+  return searchablePOIs.reduce((a, b) => {
+    const distA = haversine(pos.coords.latitude, pos.coords.longitude, a.coords[0], a.coords[1]);
+    const distB = haversine(pos.coords.latitude, pos.coords.longitude, b.coords[0], b.coords[1]);
     return distA < distB ?  a : b;
   });
 }
@@ -106,7 +71,7 @@ function updateArrowDirection() {
   const user = userLocation.coords;
   const poi = nearestPOI.coords;
 
-  const bearingToPOI = bearingBetweenPoints(user.latitude, user.longitude, poi[1], poi[0]);
+  const bearingToPOI = bearingBetweenPoints(user.latitude, user.longitude, poi[0], poi[1]);
   console.log(bearingToPOI, heading);
 
   let rotation = bearingToPOI - heading;
@@ -115,39 +80,18 @@ function updateArrowDirection() {
   arrow.style.transform = `rotate(${rotation}deg)`;
 
   if(rotation > 20 && rotation < 340) {
-    pulse.style.setProperty('--pulse-bg-gradient', 'rgb(218, 205, 27) 50%');
+    arrowPulse.style.setProperty('--arrow-pulse-bg-gradient', 'rgb(218, 205, 27) 50%');
 
     if(rotation > 60 && rotation < 300) {
-      pulse.style.setProperty('--pulse-bg-gradient', 'rgba(214, 17, 17, 1) 50%');
+      arrowPulse.style.setProperty('--arrow-pulse-bg-gradient', 'rgba(214, 17, 17, 1) 50%');
     }
   } else {
-    pulse.style.setProperty('--pulse-bg-gradient', 'rgb(83, 192, 128) 50%');
+    arrowPulse.style.setProperty('--arrow-pulse-bg-gradient', 'rgb(83, 192, 128) 50%');
   }
 }
 
-function renderPOIMarkers(userLat, userlon) {
-  poiMarkers.forEach(marker => marker.remove());
-  poiMarkers = [];
-  pois.forEach(poi => {
-    const dist = Math.round(haversine(userLat, userlon, poi.coords[1], poi.coords[0]));
-
-    const el = document.createElement('div');
-    el.style.background = 'red';
-    el.style.width = '12px';
-    el.style.height = '12px';
-    el.style.borderRadius = '50%';
-
-    const popup = new mapboxgl.Popup({ offset: 25 }).setText(`${poi.name} (${dist} m)`);
-    const marker = new mapboxgl.Marker(el).setlonLat(poi.coords).setPopup(popup).addTo(map);
-
-    poiMarkers.push(marker);
-  });
-}
-
 function recalculateDistance(lat, lon) {
-  console.log(nearestPOI);
-
-  let dist = Math.round(haversine(lat, lon, nearestPOI.coords[1], nearestPOI.coords[0]));
+  let dist = Math.round(haversine(lat, lon, nearestPOI.coords[0], nearestPOI.coords[1]));
 
   if(dist > 1000) {
     dist = (dist / 1000).toFixed(2) + 'км';
@@ -158,19 +102,21 @@ function recalculateDistance(lat, lon) {
   distanceText.innerText = 'Разстояние: ' + dist;
 }
 
-async function renderPOIs(lat, lon) {
-  nearestPOI = getNearestPOI({ coords: { latitude: lat, longitude: lon } });
+async function findPOI(lat, lon) {
+  nearestPOI = getNearestPOI({ coords: { latitude: lat, longitude: lon }});
+
+  if(!nearestPOI) {
+    headingText.innerText = 'За жалост няма такова в момента...';
+    arrow.style.display = 'none';
+    cross.style.display = 'flex';
+    return;
+  }
+
+  goingToText.innerText = "Отиваш към: " + nearestPOI.name;
+
   updateArrowDirection();
   recalculateDistance(lat, lon);
-  // renderPOIMarkers(lat, lon);
 }
-
-navigator.geolocation.watchPosition((pos) => {
-  userLocation = pos;
-  const { latitude, longitude } = pos.coords;
-  renderPOIs(latitude, longitude);
-  recalculateDistance(latitude, longitude);
-});
 
 function formatHeading(heading) {
   const dirs = ["С", "СИ", "И", "ЮИ", "Ю", "ЮЗ", "З", "СЗ"];
@@ -202,4 +148,49 @@ function handleOrientation(event) {
 
   headingText.innerText = `Направление: ${formattedHeading}`;
   updateArrowDirection();
+}
+
+function enableGeolocation() {
+  navigator.geolocation.watchPosition((pos) => {
+    userLocation = pos;
+    const { latitude, longitude } = pos.coords;
+    findPOI(latitude, longitude);
+    recalculateDistance(latitude, longitude);
+  });
+}
+
+const requestOrientation = async () => {
+  if(ORIENTATION_ACCESS) return;
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const response = await DeviceOrientationEvent.requestPermission();
+      if (response === 'granted') {
+        window.addEventListener('deviceorientationabsolute', handleOrientation);
+        window.addEventListener('deviceorientation', handleOrientation);
+
+        homeButtons.forEach(e => e.style.display = 'none');
+        arrow.style.display = 'flex';
+
+        enableGeolocation();
+
+        ORIENTATION_ACCESS = true;
+      } else {
+        alert('Permission denied for device orientation');
+      }
+    } catch (e) {
+      alert('Error requesting permission for device orientation');
+      console.error(e);
+    }
+  } else {
+    // For non-iOS devices
+    window.addEventListener('deviceorientationabsolute', handleOrientation);
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    homeButtons.forEach(e => e.style.display = 'none');
+    arrow.style.display = 'flex';
+
+    enableGeolocation();
+
+    ORIENTATION_ACCESS = true;
+  }
 }

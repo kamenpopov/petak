@@ -53,23 +53,30 @@ html {
 	padding: 0;
 }
 
-#heading-text {
-	margin-top: 4em;
+#info-text {
+	margin-top: 50px;
+}
+
+h2, h3 {
+	text-align: center;
 }
 
 #centered {
 	width: 100%;
+	max-width: 600px;
 	height: 100%;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	gap: 25px;
 }
 
-#enable-orientation {
+.home-button {
 	justify-self: center;
 	align-self: center;
-	height: 40%;
-	aspect-ratio: 1 / 1;
+	width: 80%;
+	aspect-ratio: 4 / 1;
 	background-color: #00ff0056;
 	font-size: x-large;
 	color: black;
@@ -87,18 +94,12 @@ html {
 	align-items: center;
 }
 
-#pulse {
-	--pulse-bg-gradient: rgb(83, 192, 128) 50%;
-	/* background: linear-gradient(
-		0deg,
-		rgba(0, 0, 0, 1) 0%,
-		rgb(83, 192, 128) 50%,
-		rgba(0, 0, 0, 1) 100%
-	); */
+#arrow-pulse {
+	--arrow-pulse-bg-gradient: rgb(83, 192, 128) 50%;
 	background: linear-gradient(
 		0deg,
 		rgba(0, 0, 0, 1) 0%,
-		var(--pulse-bg-gradient),
+		var(--arrow-pulse-bg-gradient),
 		rgba(0, 0, 0, 1) 100%
 	);
 	background-repeat: no-repeat;
@@ -107,18 +108,46 @@ html {
 	position: absolute;
 	height: 100%;
 	width: 100%;
-	animation: pulse 5s linear infinite;
+	animation: arrow-pulse 4s linear infinite;
 	clip-path: path(
 		"M84 175C84 180.523 79.5228 185 74 185C68.4772 185 64 180.523 64 175H84ZM66.9289 2.92893C70.8342 -0.976311 77.1658 -0.976311 81.0711 2.92893L144.711 66.5685C148.616 70.4738 148.616 76.8054 144.711 80.7107C140.805 84.6159 134.474 84.6159 130.569 80.7107L74 24.1421L17.4315 80.7107C13.5262 84.6159 7.19456 84.6159 3.28932 80.7107C-0.615921 76.8054 -0.615921 70.4738 3.28932 66.5685L66.9289 2.92893ZM74 175H64L64 10H74H84L84 175H74Z"
 	);
 }
 
-@keyframes pulse {
+#cross-component {
+	position: relative;
+	height: 185px;
+	width: 185px;
+	scale: 150%;
+	display: none;
+	align-items: center;
+}
+
+#cross-pulse {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: rgb(238, 56, 56);
+	animation: cross-pulse 1.5s ease-in-out alternate infinite;
+	clip-path: path("M167.929 2.92872C171.834 -0.976524 178.166 -0.976524 182.071 2.92872C185.977 6.83396 185.977 13.1661 182.071 17.0713L106.643 92.5L182.071 167.929L182.426 168.302C185.973 172.227 185.855 178.288 182.071 182.071C178.288 185.855 172.227 185.973 168.302 182.426L167.929 182.071L92.5 106.643L17.0713 182.071C13.166 185.977 6.83393 185.977 2.92869 182.071C-0.976555 178.166 -0.976555 171.834 2.92869 167.929L78.3574 92.5L2.92869 17.0713L2.5742 16.6982C-0.972668 12.7727 -0.854554 6.71196 2.92869 2.92872C6.71193 -0.854524 12.7727 -0.972638 16.6982 2.57423L17.0713 2.92872L92.5 78.3574L167.929 2.92872Z");
+}
+
+@keyframes cross-pulse {
+	from {
+		background-color: rgba(238, 56, 56, 0);
+	}
+
+	to {
+		background-color: rgba(238, 56, 56, 1);
+	}
+}
+
+@keyframes arrow-pulse {
 	0% {
 		background-position: 0% -100%;
 	}
 
-	60% {
+	90% {
 		background-position: 0% 200%;
 	}
 

@@ -4,48 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Търсачка на неща</title>
-  <link rel="manifest" href="/manifest.json" />
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="map"></div>
-  <div id="arrow" style="display: flex; justify-content: center; align-items: center;">
-	<i style="font-size: 5em;">^</i>
-  </div>
-
   <div id="controls">
-    <!-- <label for="category">Category:</label>
-    <select id="category">
-      <option value="">All</option>
-      <option value="coffee">Coffee</option>
-      <option value="museum">Museum</option>
-      <option value="library">Library</option>
-      <option value="food">Food</option>
-    </select> -->
-
-    <h2 id="heading-text">Направление: </h2>
-    <h2 id="distance-text">Разстояние: </h2>
-    <h3 id="debug"></h3>
+    <div id="info-text">
+      <h2 id="going-to-text"></h2>
+      <h3 id="heading-text">Направление: </h3>
+      <h3 id="distance-text">Разстояние: </h3>
+    </div>
 
     <div id="centered">
-      <button id="enable-orientation" onclick="requestOrientation()">Включи компаса</button>
+      <button class="home-button" id="alc">Пиене</button>
+      <button class="home-button" id="food">Ядене</button>
+      <button class="home-button" id="club">Парти</button>
+      <button class="home-button" id="rand">I'm feeling lucky!</button>
 
       <div id="arrow-component">
         <svg id="nav-arrow" width="148" height="185" viewBox="0 0 148 185" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M84 175C84 180.523 79.5228 185 74 185C68.4772 185 64 180.523 64 175H84ZM66.9289 2.92893C70.8342 -0.976311 77.1658 -0.976311 81.0711 2.92893L144.711 66.5685C148.616 70.4738 148.616 76.8054 144.711 80.7107C140.805 84.6159 134.474 84.6159 130.569 80.7107L74 24.1421L17.4315 80.7107C13.5262 84.6159 7.19456 84.6159 3.28932 80.7107C-0.615921 76.8054 -0.615921 70.4738 3.28932 66.5685L66.9289 2.92893ZM74 175H64L64 10H74H84L84 175H74Z" fill="black"/>
         </svg>
-        <div id="pulse"></div>
+        <div id="arrow-pulse"></div>
       </div>
+
+      <div id="cross-component">
+        <svg width="185" height="185" viewBox="0 0 185 185" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M167.929 2.92872C171.834 -0.976524 178.166 -0.976524 182.071 2.92872C185.977 6.83396 185.977 13.1661 182.071 17.0713L106.643 92.5L182.071 167.929L182.426 168.302C185.973 172.227 185.855 178.288 182.071 182.071C178.288 185.855 172.227 185.973 168.302 182.426L167.929 182.071L92.5 106.643L17.0713 182.071C13.166 185.977 6.83393 185.977 2.92869 182.071C-0.976555 178.166 -0.976555 171.834 2.92869 167.929L78.3574 92.5L2.92869 17.0713L2.5742 16.6982C-0.972668 12.7727 -0.854554 6.71196 2.92869 2.92872C6.71193 -0.854524 12.7727 -0.972638 16.6982 2.57423L17.0713 2.92872L92.5 78.3574L167.929 2.92872Z" fill="black"/>
+        </svg>
+        <div id="cross-pulse"></div>
+      </div>
+
     </div>
   </div>
 
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="pois.js"></script>
   <script src="/script.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
-  </script>
 </body>
 </html>
