@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compass POI Finder</title>
+  <title>Търсачка на неща</title>
   <link rel="manifest" href="/manifest.json" />
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
@@ -23,8 +23,13 @@
       <option value="library">Library</option>
       <option value="food">Food</option>
     </select> -->
+
+    <h2 id="heading-text">Направление: </h2>
+    <h2 id="distance-text">Разстояние: </h2>
+    <h3 id="debug"></h3>
+
     <div id="centered">
-      <button id="enable-orientation" onclick="requestOrientation()">Enable Compass</button>
+      <button id="enable-orientation" onclick="requestOrientation()">Включи компаса</button>
 
       <div id="arrow-component">
         <svg id="nav-arrow" width="148" height="185" viewBox="0 0 148 185" fill="none" xmlns="http://www.w3.org/2000/svg">
